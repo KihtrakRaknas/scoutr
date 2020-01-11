@@ -1,6 +1,6 @@
 {
   "background_color": "#FF0000",
-  "description": "A Neat Expo App",
+  "description": "A scouting native application AND website for robotics",
   "dir": "auto",
   "display": "standalone",
   "lang": "en",
