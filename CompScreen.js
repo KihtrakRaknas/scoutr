@@ -15,6 +15,7 @@ export default class CompScreen extends React.Component {
       super(props)
       let name = this.props.navigation.getParam('name', 'No Name')
       let sku = this.props.navigation.getParam('sku','sku')
+      let fireStSn;
         AsyncStorage.getItem('team').then((team)=>{
             this.setState({team})
             fetch('https://api.vexdb.io/v1/get_teams?season=current&sku='+sku)
@@ -23,59 +24,58 @@ export default class CompScreen extends React.Component {
                 console.log(responseJson)
                 let teams = responseJson["result"]
                 console.log(teams)
+                AsyncStorage.setItem('offlineTeamData-'+sku,JSON.stringify(teams))
                 this.setState({teams})            
-                firebase.firestore().collection('teams').doc(team.replace(/\D+/g, '')).collection('comp').doc(sku).collection('teams').onSnapshot(snapshot => {
-                    for(let teamItemNa in teams){
-                        let teamItem = teams[teamItemNa]
-                        snapshot.forEach(doc => {
-                            console.log(doc.id, '=>', doc.data());
-                            if(doc.id == teamItem.number){
-                                console.log("AHHH")
-                                teams[teamItemNa].haveData = true;
-                            }
-                        });
-                    }
-                    this.setState({teams}) 
+                fireStSn = firebase.firestore().collection('teams').doc(team.replace(/\D+/g, '')).collection('comp').doc(sku).collection('teams').onSnapshot(snapshot => {
+                  for(let teamItemNa in teams){
+                    let teamItem = teams[teamItemNa]
+                    let has = false;
+                    snapshot.forEach(doc => {
+                        //console.log(doc.id, '=>', doc.data());
+                        if(doc.id == teamItem.number && Object.keys(doc.data()).length>9){
+                            console.log("AHHH")
+                            has = true;
+                        }
+                    });
+                    teams[teamItemNa].haveData = has;
+                  }
+                  AsyncStorage.setItem('offlineTeamData-'+sku,JSON.stringify(teams))
+                  this.setState({teams}) 
                 })
                 .catch(err => {
                   console.log('Error getting documents', err);
                 });
               })
             })
-
+            AsyncStorage.getItem('offlineTeamData-'+sku).then((offlineTeamData)=>{
+              if(offlineTeamData){
+                  console.log(responseJson)
+                  let teams = JSON.parse(offlineTeamData)
+                  console.log(teams)
+                  this.setState({teams})            
+                  fireStSn = firebase.firestore().collection('teams').doc(team.replace(/\D+/g, '')).collection('comp').doc(sku).collection('teams').onSnapshot(snapshot => {
+                      for(let teamItemNa in teams){
+                          let teamItem = teams[teamItemNa]
+                          let has = false;
+                          snapshot.forEach(doc => {
+                              //console.log(doc.id, '=>', doc.data());
+                              if(doc.id == teamItem.number && Object.keys(doc.data()).length>9){
+                                  console.log("AHHH")
+                                  has = true;
+                              }
+                          });
+                          teams[teamItemNa].haveData = has;
+                      }
+                      this.setState({teams}) 
+                  })
+                  .catch(err => {
+                    console.log('Error getting documents', err);
+                  });
+                 }
+                })
+  
       
     }
-
-    componentDidMount() {
-        const { navigation } = this.props;
-        this.focusListener = navigation.addListener('didFocus', () => {
-            let teams = this.state.teams
-            let team = this.state.team
-            let sku = this.props.navigation.getParam('sku','sku')
-            firebase.firestore().collection('teams').doc(team.replace(/\D+/g, '')).collection('comp').doc(sku).collection('teams').get()
-                .then(snapshot => {
-                    for(let teamItemNa in teams){
-                        let teamItem = teams[teamItemNa]
-                        snapshot.forEach(doc => {
-                            console.log(doc.id, '=>', doc.data());
-                            if(doc.id == teamItem.number){
-                                console.log("AHHH")
-                                teams[teamItemNa].haveData = true;
-                            }
-                        });
-                    }
-                    this.setState({teams}) 
-                })
-                .catch(err => {
-                  console.log('Error getting documents', err);
-                });
-        });
-      }
-
-    componentWillUnmount() {
-        // Remove the event listener
-        this.focusListener.remove();
-      }
 
     static navigationOptions = ({ navigation }) => {
         return {
@@ -87,7 +87,7 @@ export default class CompScreen extends React.Component {
       return (
         <FlatList
             data={this.state.teams}
-            renderItem={({ item }) => <ListItem checkmark={item.haveData} onPress={()=>this.props.navigation.navigate('TeamInfo',{team:item.number, compName: this.props.navigation.getParam('compName'),sku:this.props.navigation.getParam('sku')})}
+            renderItem={({ item }) => <ListItem chevron checkmark={item.haveData} onPress={()=>this.props.navigation.navigate('TeamInfo',{team:item.number, compName: this.props.navigation.getParam('compName'),sku:this.props.navigation.getParam('sku')})}
             bottomDivider topDivider subtitle={item.organisation+" - "+item.region} title={item.number} />}
             keyExtractor={item => item.id}
       ListEmptyComponent={<View><Text>No Competitions found for {this.state.team}</Text></View>}

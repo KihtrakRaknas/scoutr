@@ -1,10 +1,9 @@
 {
-  "devToolsPort": 19002,
-  "expoServerPort": 19000,
   "packagerPort": 19001,
-  "packagerPid": 11888,
-  "expoServerNgrokUrl": "https://hu-6di.kihtrakraknas.roboticsscoutingtool.exp.direct",
-  "packagerNgrokUrl": "https://packager.hu-6di.kihtrakraknas.roboticsscoutingtool.exp.direct",
-  "ngrokPid": 30940,
-  "webpackServerPort": 19006
+  "packagerPid": 26544,
+  "devToolsPort": 19004,
+  "expoServerPort": 19000,
+  "expoServerNgrokUrl": "https://hu-6di.kihtrakraknas.scoutr.exp.direct",
+  "packagerNgrokUrl": "https://packager.hu-6di.kihtrakraknas.scoutr.exp.direct",
+  "ngrokPid": 20260
 }

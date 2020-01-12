@@ -6,6 +6,7 @@ import { SplashScreen } from 'expo';
 import { ListItem } from 'react-native-elements'
 import { ScrollView } from 'react-native-gesture-handler';
 import { Input } from 'react-native-elements';
+import { Dropdown } from 'react-native-material-dropdown';
 
 export default class TeamInfo extends React.Component {
 
@@ -24,7 +25,8 @@ export default class TeamInfo extends React.Component {
           if (!doc.exists) {
             console.log('No such document!');
           } else {
-            this.setState(doc.data())
+            if(!doc.metadata.hasPendingWrites)
+              this.setState(doc.data())
           }
         })
         .catch(err => {
@@ -39,6 +41,32 @@ export default class TeamInfo extends React.Component {
                 //console.log(responseJson["result"])
                 this.setState({vrating_rank:responseJson["result"][0].vrating_rank,vrating:responseJson["result"][0].vrating})
             })
+        fetch('https://api.vexdb.io/v1/get_awards?season=current&team='+team)
+            .then((response) => response.json())
+            .then((responseJson)=>{
+                console.log(responseJson)
+                //console.log(responseJson["result"])
+                this.setState({awards:responseJson["result"]})
+            })
+          fetch('https://api.vexdb.io/v1/get_events?season=current&team='+team).then((response) => response.json()).then((responseJson)=>{
+              this.setState({comps:responseJson["result"]})
+          })
+          fetch('https://api.vexdb.io/v1/get_skills?season=current&season_rank=true&team='+team).then((response) => response.json()).then((responseJson)=>{
+            for(index in responseJson["result"]){
+              let res = responseJson["result"][index]
+              let type = "?";
+              if(res.type == 0)
+                type = "Robot Skills"
+              else if(res.type == 1)
+                type = "Programming Skills"
+              else if(res.type == 2)
+                type = "Combined Skills"
+                responseJson["result"][index].type = type
+            }
+            console.log(responseJson["result"])
+            this.setState({skills:responseJson["result"]})
+        })
+          
         var db = firebase.firestore();
         console.log('compName'+ this.props.navigation.getParam('compName'))
     }
@@ -53,30 +81,160 @@ export default class TeamInfo extends React.Component {
       return (
         <KeyboardAvoidingView style={{ flex: 1, flexDirection: 'column',justifyContent: 'center',}} behavior="padding" enabled   keyboardVerticalOffset={100}>
             <ScrollView>
-                <Text style={styles.stats}>V-Rating Rank: {this.state.vrating_rank}</Text>
-                <Text style={styles.stats}>V-Rating: {this.state.vrating}</Text>
                 <View style={styles.place}/>
-                <Input placeholder='Intake Type' label='Intake Type' value={this.state["Intake Type"]} onChangeText={(text)=>this.updateFirebase('Intake Type',text)} />
+                <View style={styles.intake}><Dropdown
+                  label='Intake Type'
+                  data={[{
+                    value: 'Rollers',
+                  }, {
+                    value: 'Long Vertical Claw',
+                  }, {
+                    value: 'Claw',
+                  }, {
+                    value: 'No Intake',
+                  }, {
+                    value: 'Other (more info in comments)',
+                  }]}
+                  value={this.state["Intake Type"]}
+                  itemCount={5}
+                  onChangeText={(value) => this.updateFirebase('Intake Type',value)}
+                /></View>
+                <View style={styles.intake}><Dropdown
+                  label='Lift Type'
+                  data={[{
+                    value: '2 Bar',
+                  }, {
+                    value: '4 Bar',
+                  }, {
+                    value: 'Double Reverse 4 Bar',
+                  }, {
+                    value: 'Cascade Lift',
+                  }, {
+                    value: 'No Lift',
+                  }, {
+                    value: 'Other (more info in comments)',
+                  }]}
+                  value={this.state["Lift Type"]}
+                  itemCount={5}
+                  onChangeText={(value) => this.updateFirebase('Lift Type',value)}
+                /></View>
+                <View style={styles.intake}><Dropdown
+                  label='Drive Type'
+                  data={[{
+                    value: 'Tank Drive (2 motors)',
+                  }, {
+                    value: 'Tank Drive (4 motors)',
+                  }, {
+                    value: 'X Drive',
+                  }, {
+                    value: 'Mecanum',
+                  }, {
+                    value: 'H Drive',
+                  }, {
+                    value: 'Other (more info in comments)',
+                  }]}
+                  value={this.state["Drive Type"]}
+                  itemCount={5}
+                  onChangeText={(value) => this.updateFirebase('Drive Type',value)}
+                /></View>
                 <View style={styles.place}/>
-                <Input placeholder='Lift Type' label='Lift Type' value={this.state["Lift Type"]} onChangeText={(text)=>this.updateFirebase('Lift Type',text)} style={styles.place}/>
+                <Input keyboardType="number-pad" placeholder='Max Number of Cubes They Can Stack' label='Max Number of Cubes They Can Stack' value={this.state["Max Number of Cubes They Can Stack"]} onChangeText={(text)=>this.updateFirebase('Max Number of Cubes They Can Stack',text)} style={styles.place}/>
                 <View style={styles.place}/>
-                <Input placeholder='Drive Type' label='Drive Type' value={this.state["Drive Type"]} onChangeText={(text)=>this.updateFirebase('Drive Type',text)} style={styles.place}/>
+                <View style={styles.intake}><Dropdown
+                  label='Scoring Towers'
+                  data={[{
+                    value: 'Can score all towers',
+                  }, {
+                    value: 'Can score low and medium towers',
+                  }, {
+                    value: 'Can only score low towers',
+                  }, {
+                    value: `Can't score any towers`,
+                  }, {
+                    value: 'Other (more info in comments)',
+                  }]}
+                  value={this.state["Scoring Towers"]}
+                  itemCount={5}
+                  onChangeText={(value) => this.updateFirebase('Scoring Towers',value)}
+                /></View>   
+                <View style={styles.intake}><Dropdown
+                  label='Descoring Towers'
+                  data={[{
+                    value: 'Can descore all towers',
+                  }, {
+                    value: 'Can descore low and medium towers',
+                  }, {
+                    value: 'Can only descore low towers',
+                  }, {
+                    value: `Can't descore any towers`,
+                  }, {
+                    value: 'Other (more info in comments)',
+                  }]}
+                  value={this.state["Descoring Towers"]}
+                  itemCount={5}
+                  onChangeText={(value) => this.updateFirebase('Descoring Towers',value)}
+                /></View>              
                 <View style={styles.place}/>
-                <Input placeholder='Max Number of Cubes' label='Max Number of Cubes' value={this.state["Max Number of Cubes"]} onChangeText={(text)=>this.updateFirebase('Max Number of Cubes',text)} style={styles.place}/>
+                <Input placeholder='Protected Zone Auton Point Value and Reliability' label='Protected Zone Auton Point Value and Reliability' value={this.state["Protected Zone Auton Point Value and Reliability"]} onChangeText={(text)=>this.updateFirebase('Protected Zone Auton Point Value and Reliability',text)} style={styles.place}/>
                 <View style={styles.place}/>
-                <Input placeholder='Highest Tower' label='Highest Tower' value={this.state["Highest Tower"]} onChangeText={(text)=>this.updateFirebase('Highest Tower',text)} style={styles.place}/>
+                <Input placeholder='Unprotected Zone Auton Point Value and Reliability' label='Unprotected Zone Auton Point Value and Reliability' value={this.state["Unprotected Zone Auton Point Value and Reliability"]} onChangeText={(text)=>this.updateFirebase('Unprotected Zone Auton Point Value and Reliability',text)} style={styles.place}/>
                 <View style={styles.place}/>
-                <Input placeholder='Highest Descoreable Tower' label='Highest Descoreable Tower' value={this.state["Highest Descoreable Tower"]} onChangeText={(text)=>this.updateFirebase('Highest Descoreable Tower',text)} style={styles.place}/>
-                <View style={styles.place}/>
-                <Input placeholder='Protected Zone Auton' label='Protected Zone Auton' value={this.state["Protected Zone Auton"]} onChangeText={(text)=>this.updateFirebase('Protected Zone Auton',text)} style={styles.place}/>
-                <View style={styles.place}/>
-                <Input placeholder='Unprotected Zone Auton' label='Unprotected Zone Auton' value={this.state["Unprotected Zone Auton"]} onChangeText={(text)=>this.updateFirebase('Unprotected Zone Auton',text)} style={styles.place}/>
-                <View style={styles.place}/>
-                <Input placeholder='2 Stacks in Protected Zone' label='2 Stacks in Protected Zone' value={this.state["2 Stacks in Protected Zone"]} onChangeText={(text)=>this.updateFirebase('2 Stacks in Protected Zone',text)} style={styles.place}/>
-                <View style={styles.place}/>
-                <Input placeholder='Add On To Exisiting Stacks' label='Add On To Exisiting Stacks' value={this.state["Add On To Exisiting Stacks"]} onChangeText={(text)=>this.updateFirebase('Add On To Exisiting Stacks',text)} style={styles.place}/>
+                <View style={styles.intake}><Dropdown
+                  label='Can they get 2 stacks in the protected zone?'
+                  data={[{
+                    value: 'They can get 2 stacks in the protected zone',
+                  }, {
+                    value: `They stuggle with 2 stacks in the protected zone`,
+                  }, {
+                    value: `They can't get 2 stacks in the protected zone`,
+                  }]}
+                  value={this.state["Can they get 2 stacks in the protected zone?"]}
+                  itemCount={5}
+                  onChangeText={(value) => this.updateFirebase('Can they get 2 stacks in the protected zone?',value)}
+                /></View>  
+                <View style={styles.intake}><Dropdown
+                  label='Add onto existing stacks?'
+                  data={[{
+                    value: 'They can add onto existing stacks',
+                  }, {
+                    value: `They can't add onto existing stacks`,
+                  }]}
+                  value={this.state["Add onto existing stacks?"]}
+                  itemCount={5}
+                  onChangeText={(value) => this.updateFirebase('Add onto existing stacks?',value)}
+                /></View>  
                 <View style={styles.place}/>
                 <Input placeholder='Other Comments' label='Other Comments' value={this.state["Other Comments"]} onChangeText={(text)=>this.updateFirebase('Other Comments',text)} style={styles.place}/>
+                <View style={styles.place}/>
+                <Text style={styles.stats}>V-Rating Rank: {this.state.vrating_rank}</Text>
+                <Text style={styles.stats}>V-Rating: {this.state.vrating}</Text>
+                <Text style={styles.stats}>Past Awards:</Text>
+                <FlatList
+                  data={this.state.awards}
+                  renderItem={({ item }) => <ListItem bottomDivider topDivider title={item.name} />}
+
+                  keyExtractor={item => item.id}
+                  ListEmptyComponent={<View><Text style={styles.stats}>No awards found for {this.props.navigation.getParam('team','Team Name')}</Text></View>}
+                />
+                <Text style={styles.stats}>Past Competitions:</Text>
+                <FlatList
+                  data={this.state.comps}
+                  renderItem={({ item }) => new Date(item.end)<new Date()?<ListItem bottomDivider topDivider title={item.name}/>:null}
+
+                  keyExtractor={item => item.id}
+                  ListEmptyComponent={<View><Text style={styles.stats}>No competitions found for {this.props.navigation.getParam('team','Team Name')}</Text></View>}
+                />
+                <View style={styles.place}/>
+                <Text style={styles.stats}>Skills Scores:</Text>
+                <FlatList
+                  data={this.state.skills}
+                  renderItem={({ item }) => <ListItem bottomDivider topDivider title={item.type} rightTitle={item.score+" (Rank: "+item.season_rank+")"}/>}
+
+                  keyExtractor={item => item.id}
+                  ListEmptyComponent={<View><Text style={styles.stats}>No skills data found for {this.props.navigation.getParam('team','Team Name')}</Text></View>}
+                />
+                <View style={styles.place}/>
+                <View style={styles.place}/>
                 <View style={styles.place}/>
                 <View style={styles.place}/>
             </ScrollView>
@@ -86,14 +244,9 @@ export default class TeamInfo extends React.Component {
 
     updateFirebase(feild,content){
         this.setState({[feild]: content,})
-        console.log(feild)
-        console.log(content)
         let currTeam = this.state.team
         let compName = this.props.navigation.getParam('sku')
         let team = this.props.navigation.getParam('team','default team')
-        console.log(currTeam)
-        console.log(compName)
-        console.log(team)
         firebase.firestore().collection('teams').doc(currTeam.replace(/\D+/g, '')).collection('comp').doc(compName).collection('teams').doc(team).set({
             [feild]: content,
         },{merge: true})
@@ -112,7 +265,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor:"red",
-    
   },
   textInputBox: {
     borderBottomColor:"white",
@@ -148,6 +300,9 @@ const styles = StyleSheet.create({
       paddingVertical:25,
   },
   place:{
-      paddingVertical:5,
+      paddingVertical:10,
+  },
+  intake:{
+    marginHorizontal:10,
   }
 })

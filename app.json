@@ -2,9 +2,9 @@
   "name": "RoboticsScoutingTool",
   "displayName": "Scoutr",
   "expo": {
-    "name": "RoboticsScoutingTool",
-    "slug": "scoutr",
-    "privacy": "unlisted",
+    "name": "Scoutr",
+    "slug": "RoboticsScoutingTool",
+    "privacy": "public",
     "sdkVersion": "36.0.0",
     "version": "1.0.0",
     "entryPoint": "node_modules/expo/AppEntry.js",
@@ -15,12 +15,13 @@
     ],
     "splash": {
       "image": "./assets/splash.png",
-      "backgroundColor": "#FF0000"
+      "backgroundColor": "#FF0000",
+      "resizeMode": "cover"
     },
     "icon": "./assets/icon.png",
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.kihtrak.scoutrTool"
+      "bundleIdentifier": "com.kihtrak.scouterTool"
     },
     "android": {
       "package": "com.kihtrak.scoutr",
