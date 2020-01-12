@@ -24,8 +24,7 @@ export default class CompScreen extends React.Component {
                 let teams = responseJson["result"]
                 console.log(teams)
                 this.setState({teams})            
-                firebase.firestore().collection('teams').doc(team).collection('comp').doc(sku).collection('teams').get()
-                .then(snapshot => {
+                firebase.firestore().collection('teams').doc(team.replace(/\D+/g, '')).collection('comp').doc(sku).collection('teams').onSnapshot(snapshot => {
                     for(let teamItemNa in teams){
                         let teamItem = teams[teamItemNa]
                         snapshot.forEach(doc => {

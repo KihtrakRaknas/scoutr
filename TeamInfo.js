@@ -20,8 +20,7 @@ export default class TeamInfo extends React.Component {
         let currTeam = team
         let compName = this.props.navigation.getParam('sku')
         let selTeam = this.props.navigation.getParam('team','default team')
-        firebase.firestore().collection('teams').doc(currTeam.replace(/\D+/g, '')).collection('comp').doc(compName).collection('teams').doc(selTeam).get()
-        .then(doc => {
+        firebase.firestore().collection('teams').doc(currTeam.replace(/\D+/g, '')).collection('comp').doc(compName).collection('teams').doc(selTeam).onSnapshot(doc => {
           if (!doc.exists) {
             console.log('No such document!');
           } else {
@@ -67,11 +66,19 @@ export default class TeamInfo extends React.Component {
                 <View style={styles.place}/>
                 <Input placeholder='Highest Tower' label='Highest Tower' value={this.state["Highest Tower"]} onChangeText={(text)=>this.updateFirebase('Highest Tower',text)} style={styles.place}/>
                 <View style={styles.place}/>
+                <Input placeholder='Highest Descoreable Tower' label='Highest Descoreable Tower' value={this.state["Highest Descoreable Tower"]} onChangeText={(text)=>this.updateFirebase('Highest Descoreable Tower',text)} style={styles.place}/>
+                <View style={styles.place}/>
                 <Input placeholder='Protected Zone Auton' label='Protected Zone Auton' value={this.state["Protected Zone Auton"]} onChangeText={(text)=>this.updateFirebase('Protected Zone Auton',text)} style={styles.place}/>
                 <View style={styles.place}/>
                 <Input placeholder='Unprotected Zone Auton' label='Unprotected Zone Auton' value={this.state["Unprotected Zone Auton"]} onChangeText={(text)=>this.updateFirebase('Unprotected Zone Auton',text)} style={styles.place}/>
                 <View style={styles.place}/>
+                <Input placeholder='2 Stacks in Protected Zone' label='2 Stacks in Protected Zone' value={this.state["2 Stacks in Protected Zone"]} onChangeText={(text)=>this.updateFirebase('2 Stacks in Protected Zone',text)} style={styles.place}/>
+                <View style={styles.place}/>
+                <Input placeholder='Add On To Exisiting Stacks' label='Add On To Exisiting Stacks' value={this.state["Add On To Exisiting Stacks"]} onChangeText={(text)=>this.updateFirebase('Add On To Exisiting Stacks',text)} style={styles.place}/>
+                <View style={styles.place}/>
                 <Input placeholder='Other Comments' label='Other Comments' value={this.state["Other Comments"]} onChangeText={(text)=>this.updateFirebase('Other Comments',text)} style={styles.place}/>
+                <View style={styles.place}/>
+                <View style={styles.place}/>
             </ScrollView>
         </KeyboardAvoidingView> 
       )
@@ -138,7 +145,7 @@ const styles = StyleSheet.create({
   stats:{
       fontSize:20,
       paddingHorizontal:10,
-      paddingVertical:20,
+      paddingVertical:25,
   },
   place:{
       paddingVertical:5,
