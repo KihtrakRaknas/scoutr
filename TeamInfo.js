@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, TextInput, View, Button, Alert, KeyboardAvoidingView, TouchableOpacity, AsyncStorage, FlatList} from 'react-native'
+import { StyleSheet, Text, TextInput, View, Button, Alert, KeyboardAvoidingView, TouchableOpacity, AsyncStorage, FlatList, Platform} from 'react-native'
 import firebase from 'firebase'
 import 'firebase/firestore';
 import { SplashScreen } from 'expo';
@@ -29,9 +29,6 @@ export default class TeamInfo extends React.Component {
               this.setState(doc.data())
           }
         })
-        .catch(err => {
-          console.log('Error getting document', err);
-        });
       })
       let team = this.props.navigation.getParam('team','750S')
         fetch('https://api.vexdb.io/v1/get_season_rankings?season=current&team='+team)
@@ -52,7 +49,7 @@ export default class TeamInfo extends React.Component {
               this.setState({comps:responseJson["result"]})
           })
           fetch('https://api.vexdb.io/v1/get_skills?season=current&season_rank=true&team='+team).then((response) => response.json()).then((responseJson)=>{
-            for(index in responseJson["result"]){
+            for(let index in responseJson["result"]){
               let res = responseJson["result"][index]
               let type = "?";
               if(res.type == 0)
@@ -76,51 +73,34 @@ export default class TeamInfo extends React.Component {
             title: navigation.getParam('team', 'No Name').substring(0,25)+`${navigation.getParam('team', 'No Name').substring(25).trim()!=""?'...':''}`,
         };
       };
+
+      createDropDown(name,options,oldFormat){
+        let data = []
+        for(let option of options)
+          data.push({
+            value: option,
+          })
+        if(oldFormat)
+          data = options
+        if(Platform.OS !== 'web')
+          return(<View style={styles.intake}><Dropdown
+                    label={name}
+                    data={data}
+                    value={this.state[name]}
+                    itemCount={5}
+                    onChangeText={(value) => this.updateFirebase(name,value)}
+                  /></View>)
+        return(<Input placeholder={name} label={name} value={this.state[name]} onChangeText={(text)=>this.updateFirebase(name,text)} style={styles.place}/>)
+      }
    
     render() {
       return (
         <KeyboardAvoidingView style={{ flex: 1, flexDirection: 'column',justifyContent: 'center',}} behavior="padding" enabled   keyboardVerticalOffset={100}>
             <ScrollView>
                 <View style={styles.place}/>
-                <View style={styles.intake}><Dropdown
-                  label='Intake Type'
-                  data={[{
-                    value: 'Rollers',
-                  }, {
-                    value: 'Long Vertical Claw',
-                  }, {
-                    value: 'Claw',
-                  }, {
-                    value: 'No Intake',
-                  }, {
-                    value: 'Other (more info in comments)',
-                  }]}
-                  value={this.state["Intake Type"]}
-                  itemCount={5}
-                  onChangeText={(value) => this.updateFirebase('Intake Type',value)}
-                /></View>
-                <View style={styles.intake}><Dropdown
-                  label='Lift Type'
-                  data={[{
-                    value: '2 Bar',
-                  }, {
-                    value: '4 Bar',
-                  }, {
-                    value: 'Double Reverse 4 Bar',
-                  }, {
-                    value: 'Cascade Lift',
-                  }, {
-                    value: 'No Lift',
-                  }, {
-                    value: 'Other (more info in comments)',
-                  }]}
-                  value={this.state["Lift Type"]}
-                  itemCount={5}
-                  onChangeText={(value) => this.updateFirebase('Lift Type',value)}
-                /></View>
-                <View style={styles.intake}><Dropdown
-                  label='Drive Type'
-                  data={[{
+                {this.createDropDown("Intake Type", ['Rollers','Long Vertical Claw','Claw','No Intake','Other (more info in comments)'])}
+                {this.createDropDown("Lift Type", ['2 Bar','4 Bar','Double Reverse 4 Bar','Cascade Lift','No Lift','Other (more info in comments)'])}
+                {this.createDropDown("Drive Type", [{
                     value: 'Tank Drive (2 motors)',
                   }, {
                     value: 'Tank Drive (4 motors)',
@@ -132,17 +112,11 @@ export default class TeamInfo extends React.Component {
                     value: 'H Drive',
                   }, {
                     value: 'Other (more info in comments)',
-                  }]}
-                  value={this.state["Drive Type"]}
-                  itemCount={5}
-                  onChangeText={(value) => this.updateFirebase('Drive Type',value)}
-                /></View>
+                  }],true)}
                 <View style={styles.place}/>
                 <Input keyboardType="number-pad" placeholder='Max Number of Cubes They Can Stack' label='Max Number of Cubes They Can Stack' value={this.state["Max Number of Cubes They Can Stack"]} onChangeText={(text)=>this.updateFirebase('Max Number of Cubes They Can Stack',text)} style={styles.place}/>
                 <View style={styles.place}/>
-                <View style={styles.intake}><Dropdown
-                  label='Scoring Towers'
-                  data={[{
+                {this.createDropDown('Scoring Towers',[{
                     value: 'Can score all towers',
                   }, {
                     value: 'Can score low and medium towers',
@@ -152,14 +126,8 @@ export default class TeamInfo extends React.Component {
                     value: `Can't score any towers`,
                   }, {
                     value: 'Other (more info in comments)',
-                  }]}
-                  value={this.state["Scoring Towers"]}
-                  itemCount={5}
-                  onChangeText={(value) => this.updateFirebase('Scoring Towers',value)}
-                /></View>   
-                <View style={styles.intake}><Dropdown
-                  label='Descoring Towers'
-                  data={[{
+                  }],true)}
+                {this.createDropDown('Descoring Towers',[{
                     value: 'Can descore all towers',
                   }, {
                     value: 'Can descore low and medium towers',
@@ -169,40 +137,24 @@ export default class TeamInfo extends React.Component {
                     value: `Can't descore any towers`,
                   }, {
                     value: 'Other (more info in comments)',
-                  }]}
-                  value={this.state["Descoring Towers"]}
-                  itemCount={5}
-                  onChangeText={(value) => this.updateFirebase('Descoring Towers',value)}
-                /></View>              
+                  }],true)}     
                 <View style={styles.place}/>
                 <Input placeholder='Protected Zone Auton Point Value and Reliability' label='Protected Zone Auton Point Value and Reliability' value={this.state["Protected Zone Auton Point Value and Reliability"]} onChangeText={(text)=>this.updateFirebase('Protected Zone Auton Point Value and Reliability',text)} style={styles.place}/>
                 <View style={styles.place}/>
                 <Input placeholder='Unprotected Zone Auton Point Value and Reliability' label='Unprotected Zone Auton Point Value and Reliability' value={this.state["Unprotected Zone Auton Point Value and Reliability"]} onChangeText={(text)=>this.updateFirebase('Unprotected Zone Auton Point Value and Reliability',text)} style={styles.place}/>
                 <View style={styles.place}/>
-                <View style={styles.intake}><Dropdown
-                  label='Can they get 2 stacks in the protected zone?'
-                  data={[{
+                {this.createDropDown('Can they get 2 stacks in the protected zone?',[{
                     value: 'They can get 2 stacks in the protected zone',
                   }, {
                     value: `They stuggle with 2 stacks in the protected zone`,
                   }, {
                     value: `They can't get 2 stacks in the protected zone`,
-                  }]}
-                  value={this.state["Can they get 2 stacks in the protected zone?"]}
-                  itemCount={5}
-                  onChangeText={(value) => this.updateFirebase('Can they get 2 stacks in the protected zone?',value)}
-                /></View>  
-                <View style={styles.intake}><Dropdown
-                  label='Add onto existing stacks?'
-                  data={[{
+                  }],true)} 
+                {this.createDropDown('Add onto existing stacks?',[{
                     value: 'They can add onto existing stacks',
                   }, {
                     value: `They can't add onto existing stacks`,
-                  }]}
-                  value={this.state["Add onto existing stacks?"]}
-                  itemCount={5}
-                  onChangeText={(value) => this.updateFirebase('Add onto existing stacks?',value)}
-                /></View>  
+                  }],true)}
                 <View style={styles.place}/>
                 <Input placeholder='Other Comments' label='Other Comments' value={this.state["Other Comments"]} onChangeText={(text)=>this.updateFirebase('Other Comments',text)} style={styles.place}/>
                 <View style={styles.place}/>
@@ -253,9 +205,6 @@ export default class TeamInfo extends React.Component {
         .then(function(docRef) {
             console.log("Document written with ID: ", docRef);
         })
-        .catch(function(error) {
-            console.error("3Error adding document: ", error);
-        });
     }
 }
 

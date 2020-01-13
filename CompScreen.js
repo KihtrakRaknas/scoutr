@@ -39,40 +39,43 @@ export default class CompScreen extends React.Component {
                     });
                     teams[teamItemNa].haveData = has;
                   }
-                  AsyncStorage.setItem('offlineTeamData-'+sku,JSON.stringify(teams))
+                  AsyncStorage.setItem('offlineTeamData'+sku,JSON.stringify(teams))
                   this.setState({teams}) 
                 })
-                .catch(err => {
-                  console.log('Error getting documents', err);
-                });
               })
-            })
-            AsyncStorage.getItem('offlineTeamData-'+sku).then((offlineTeamData)=>{
-              if(offlineTeamData){
-                  console.log(responseJson)
-                  let teams = JSON.parse(offlineTeamData)
-                  console.log(teams)
-                  this.setState({teams})            
-                  fireStSn = firebase.firestore().collection('teams').doc(team.replace(/\D+/g, '')).collection('comp').doc(sku).collection('teams').onSnapshot(snapshot => {
-                      for(let teamItemNa in teams){
-                          let teamItem = teams[teamItemNa]
-                          let has = false;
-                          snapshot.forEach(doc => {
-                              //console.log(doc.id, '=>', doc.data());
-                              if(doc.id == teamItem.number && Object.keys(doc.data()).length>9){
-                                  console.log("AHHH")
-                                  has = true;
-                              }
-                          });
-                          teams[teamItemNa].haveData = has;
-                      }
-                      this.setState({teams}) 
+
+
+              AsyncStorage.getItem('offlineTeamData'+sku).then((offlineTeamData)=>{
+              
+                if(offlineTeamData){
+                  console.log("\n\n\n\n\nOFF\n\n\n\n\n")
+                    console.log(offlineTeamData)
+                    let teams = JSON.parse(offlineTeamData)
+                    console.log(teams)
+                    this.setState({teams})            
+                    fireStSn = firebase.firestore().collection('teams').doc(team.replace(/\D+/g, '')).collection('comp').doc(sku).collection('teams').onSnapshot(snapshot => {
+                        for(let teamItemNa in teams){
+                            let teamItem = teams[teamItemNa]
+                            let has = false;
+                            snapshot.forEach(doc => {
+                                //console.log(doc.id, '=>', doc.data());
+                                if(doc.id == teamItem.number && Object.keys(doc.data()).length>9){
+                                    console.log("AHHH")
+                                    has = true;
+                                }
+                            });
+                            teams[teamItemNa].haveData = has;
+                        }
+                        this.setState({teams}) 
+                    })
+                   }
+  
                   })
-                  .catch(err => {
-                    console.log('Error getting documents', err);
-                  });
-                 }
-                })
+            
+
+
+            })
+            
   
       
     }
