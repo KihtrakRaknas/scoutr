@@ -156,6 +156,7 @@ export default class TeamInfo extends React.Component {
                     value: `They can't add onto existing stacks`,
                   }],true)}
                 <View style={styles.place}/>
+                <Input placeholder='Pit Location' label='Unprotected Zone Auton Point Value and Reliability' value={this.state["Unprotected Zone Auton Point Value and Reliability"]} onChangeText={(text)=>this.updateFirebase('Unprotected Zone Auton Point Value and Reliability',text)} style={styles.place}/>
                 <Input placeholder='Other Comments' label='Other Comments' value={this.state["Other Comments"]} onChangeText={(text)=>this.updateFirebase('Other Comments',text)} style={styles.place}/>
                 <View style={styles.place}/>
                 <Text style={styles.stats}>V-Rating Rank: {this.state.vrating_rank}</Text>

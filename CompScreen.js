@@ -15,15 +15,14 @@ export default class CompScreen extends React.Component {
       super(props)
       let name = this.props.navigation.getParam('name', 'No Name')
       let sku = this.props.navigation.getParam('sku','sku')
+      console.log(sku)
       let fireStSn;
         AsyncStorage.getItem('team').then((team)=>{
             this.setState({team})
             fetch('https://api.vexdb.io/v1/get_teams?season=current&sku='+sku)
             .then((response) => response.json())
             .then((responseJson)=>{
-                console.log(responseJson)
                 let teams = responseJson["result"]
-                console.log(teams)
                 AsyncStorage.setItem('offlineTeamData-'+sku,JSON.stringify(teams))
                 this.setState({teams})            
                 fireStSn = firebase.firestore().collection('teams').doc(team.replace(/\D+/g, '')).collection('comp').doc(sku).collection('teams').onSnapshot(snapshot => {
@@ -42,16 +41,67 @@ export default class CompScreen extends React.Component {
                   AsyncStorage.setItem('offlineTeamData'+sku,JSON.stringify(teams))
                   this.setState({teams}) 
                 })
+                console.log(team+"1")
+
+                fetch('https://api.vexdb.io/v1/get_matches?season=current&sku='+sku+'&team='+team)
+                .then((response) => response.json())
+                .then((responseJson)=>{
+                  console.log(team+"2")
+                    let matches = responseJson["result"]
+                    let allies = []
+                    let opps = []
+                    if(matches.length>0){
+                        for(let matchNa in matches){
+                          let matchItem = matches[matchNa]
+                          let ourTeamColor;
+                          let oppTeamColor
+                          if(matchItem.red1==team||matchItem.red1==team||matchItem.red3==team){
+                            ourTeamColor = "red"
+                            oppTeamColor = "blue"
+                          }else if(matchItem.blue1==team||matchItem.blue2==team||matchItem.blue3==team){
+                            ourTeamColor = "blue"
+                            oppTeamColor = "red"
+                          }
+                          for(var i = 1; i!=4;i++){
+                            if(matchItem[ourTeamColor+i]!=team)
+                              allies.push(matchItem[ourTeamColor+i])
+                          }
+                          for(var i = 1; i!=4;i++){
+                              opps.push(matchItem[oppTeamColor+i])
+                          }
+                        }
+    
+                        for(let teamItemNa in teams){
+                          let teamItem = teams[teamItemNa]
+                          let hasAlly = false;
+                          let hasOpp = false;
+                          for(let ally of allies)
+                            if(ally == teamItem.number)
+                              hasAlly = true
+                          for(let opp of opps)
+                            if(opp == teamItem.number)
+                              hasOpp = true
+                          teams[teamItemNa].ally = hasAlly;
+                          teams[teamItemNa].opp = hasOpp;
+                        }
+    
+                        AsyncStorage.setItem('offlineTeamData'+sku,JSON.stringify(teams))
+                        this.setState({teams}) 
+                        console.log(team+"3")
+                      }
+                    })
+                  })
+
+
               })
+
 
 
               AsyncStorage.getItem('offlineTeamData'+sku).then((offlineTeamData)=>{
               
                 if(offlineTeamData){
                   console.log("\n\n\n\n\nOFF\n\n\n\n\n")
-                    console.log(offlineTeamData)
                     let teams = JSON.parse(offlineTeamData)
-                    console.log(teams)
                     this.setState({teams})            
                     fireStSn = firebase.firestore().collection('teams').doc(team.replace(/\D+/g, '')).collection('comp').doc(sku).collection('teams').onSnapshot(snapshot => {
                         for(let teamItemNa in teams){
@@ -70,12 +120,7 @@ export default class CompScreen extends React.Component {
                     })
                    }
   
-                  })
-            
-
-
-            })
-            
+                  })            
   
       
     }
@@ -91,7 +136,7 @@ export default class CompScreen extends React.Component {
         <FlatList
             data={this.state.teams}
             renderItem={({ item }) => <ListItem chevron checkmark={item.haveData} onPress={()=>this.props.navigation.navigate('TeamInfo',{team:item.number, compName: this.props.navigation.getParam('compName'),sku:this.props.navigation.getParam('sku')})}
-            bottomDivider topDivider subtitle={item.organisation+" - "+item.region} title={item.number} />}
+            bottomDivider topDivider subtitle={item.organisation+" - "+item.region} title={item.number} titleStyle={item.ally&&item.opp?{ color: 'purple', fontWeight: 'bold' }:item.ally?{ color: 'green', fontWeight: 'bold' }:item.opp?{ color: 'red', fontWeight: 'bold' }:null}/>}
             keyExtractor={item => item.id}
       ListEmptyComponent={<View><Text>No Competitions found for {this.state.team}</Text></View>}
         />
