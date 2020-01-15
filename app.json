@@ -24,7 +24,7 @@
       "bundleIdentifier": "com.kihtrak.scouterTool"
     },
     "android": {
-      "package": "com.kihtrak.scoutr",
+      "package": "com.kihtrak.scouter",
       "versionCode": 1
     },
     "description": "A scouting native application AND website for robotics"

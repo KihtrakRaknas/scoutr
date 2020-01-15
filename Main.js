@@ -40,8 +40,8 @@ export default class SetUp extends React.Component {
       let download = null
       if(Platform.OS === 'web')
         download=<View>
-          <Button title="Download iOS App" onPress={()=>{Linking.openURL('https://testflight.apple.com/join/l4Ywtctb').catch((err) => console.error('An error occurred', err))}}/>
-          <Button title="Download Android App" onPress={()=>{Linking.openURL('https://play.google.com/store/apps/details?id=com.kihtrak.scoutr').catch((err) => console.error('An error occurred', err))}}/>
+          <Button title="Download iOS App" onPress={()=>{Linking.openURL('https://apps.apple.com/us/app/robotics-scouting-tool/id1494612234').catch((err) => console.error('An error occurred', err))}}/>
+          <Button title="Download Android App" onPress={()=>{Linking.openURL('https://play.google.com/store/apps/details?id=com.kihtrak.scouter').catch((err) => console.error('An error occurred', err))}}/>
           
         </View>
       return (
