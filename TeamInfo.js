@@ -11,11 +11,14 @@ import { Dropdown } from 'react-native-material-dropdown';
 export default class TeamInfo extends React.Component {
 
       state = {
-        team:null
+        team:null,name:"Didn't load in"
       }
     
     constructor(props){
       super(props)
+      AsyncStorage.getItem('name').then((name)=>{
+        this.setState({name})
+      });
       AsyncStorage.getItem('team').then((team)=>{
         this.setState({team})
         let currTeam = team
@@ -97,6 +100,7 @@ export default class TeamInfo extends React.Component {
       return (
         <KeyboardAvoidingView style={{ flex: 1, flexDirection: 'column',justifyContent: 'center',}} behavior="padding" enabled   keyboardVerticalOffset={100}>
             <ScrollView>
+                <Text style={{textAlign: 'center', marginHorizontal:20}}>{this.state["Last Update"]}</Text>
                 <View style={styles.place}/>
                 {this.createDropDown("Intake Type", ['Rollers','Long Vertical Claw','Claw','No Intake','Other (more info in comments)'])}
                 {this.createDropDown("Lift Type", ['2 Bar','4 Bar','Double Reverse 4 Bar','Cascade Lift','No Lift','Other (more info in comments)'])}
@@ -200,8 +204,12 @@ export default class TeamInfo extends React.Component {
         let currTeam = this.state.team
         let compName = this.props.navigation.getParam('sku')
         let team = this.props.navigation.getParam('team','default team')
+        let now = new Date()
+console.log(((now.getHours()-1)%12+1)+":"+now.getMinutes()+" "+(now.getHours()>=12?"PM":"AM")+" "+(now.getMonth()+1)+"/"+now.getDate()+"/"+now.getFullYear()%100);
+
         firebase.firestore().collection('teams').doc(currTeam.replace(/\D+/g, '')).collection('comp').doc(compName).collection('teams').doc(team).set({
             [feild]: content,
+            "Last Update": this.state.name+" - "+this.state.team+" - "+((now.getHours()-1)%12+1)+":"+(now.getMinutes()<10?'0'+now.getMinutes():now.getMinutes())+" "+(now.getHours()>=12?"PM":"AM")+" "+(now.getMonth()+1)+"/"+now.getDate()+"/"+now.getFullYear()%100
         },{merge: true})
         .then(function(docRef) {
             console.log("Document written with ID: ", docRef);

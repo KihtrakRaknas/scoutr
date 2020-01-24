@@ -23,11 +23,17 @@ export default class SetUp extends React.Component {
       AsyncStorage.getItem('team').then((team)=>{
         this.setState({team})
         console.log('https://api.vexdb.io/v1/get_events?season=current&team='+team)
-        fetch('https://api.vexdb.io/v1/get_events?season=current&team='+team).then((response) => response.json()).then((responseJson)=>{
-            console.log(responseJson)
-            console.log(responseJson["result"])
+        fetch('https://api.vexdb.io/v1/get_events?season=current&team='+team)
+        .then(
+          (response) => 
+            response.json()
+        )
+        .then(
+          (responseJson)=>{
             AsyncStorage.setItem('offlineEventData',JSON.stringify(responseJson["result"]))
-            this.setState({comps:responseJson["result"]})
+            this.setState({
+              comps:responseJson["result"]
+            })
         })
       })
       AsyncStorage.getItem('offlineEventData').then((offlineEventData)=>{

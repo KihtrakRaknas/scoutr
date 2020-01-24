@@ -31,7 +31,7 @@ export default class CompScreen extends React.Component {
                     let has = false;
                     snapshot.forEach(doc => {
                         //console.log(doc.id, '=>', doc.data());
-                        if(doc.id == teamItem.number && Object.keys(doc.data()).length>9){
+                        if(doc.id == teamItem.number && Object.keys(doc.data()).length>10){
                             console.log("AHHH")
                             has = true;
                         }
@@ -46,7 +46,6 @@ export default class CompScreen extends React.Component {
                 fetch('https://api.vexdb.io/v1/get_matches?season=current&sku='+sku+'&team='+team)
                 .then((response) => response.json())
                 .then((responseJson)=>{
-                  console.log(team+"2")
                     let matches = responseJson["result"]
                     let allies = []
                     let opps = []
@@ -62,15 +61,12 @@ export default class CompScreen extends React.Component {
                             ourTeamColor = "blue"
                             oppTeamColor = "red"
                           }
-                          for(var i = 1; i!=4;i++){
+                          for(var i = 1; i!=4;i++)
                             if(matchItem[ourTeamColor+i]!=team)
                               allies.push(matchItem[ourTeamColor+i])
-                          }
-                          for(var i = 1; i!=4;i++){
+                          for(var i = 1; i!=4;i++)
                               opps.push(matchItem[oppTeamColor+i])
-                          }
                         }
-    
                         for(let teamItemNa in teams){
                           let teamItem = teams[teamItemNa]
                           let hasAlly = false;
@@ -84,10 +80,8 @@ export default class CompScreen extends React.Component {
                           teams[teamItemNa].ally = hasAlly;
                           teams[teamItemNa].opp = hasOpp;
                         }
-    
-                        AsyncStorage.setItem('offlineTeamData'+sku,JSON.stringify(teams))
-                        this.setState({teams}) 
-                        console.log(team+"3")
+                        AsyncStorage.setItem('offlineTeamData'+sku,JSON.stringify(teams)) //save the data offline for later
+                        this.setState({teams}) //send new team information to app interface
                       }
                     })
                   })
@@ -109,7 +103,7 @@ export default class CompScreen extends React.Component {
                             let has = false;
                             snapshot.forEach(doc => {
                                 //console.log(doc.id, '=>', doc.data());
-                                if(doc.id == teamItem.number && Object.keys(doc.data()).length>9){
+                                if(doc.id == teamItem.number && Object.keys(doc.data()).length>10){
                                     console.log("AHHH")
                                     has = true;
                                 }
@@ -138,7 +132,7 @@ export default class CompScreen extends React.Component {
             renderItem={({ item }) => <ListItem chevron checkmark={item.haveData} onPress={()=>this.props.navigation.navigate('TeamInfo',{team:item.number, compName: this.props.navigation.getParam('compName'),sku:this.props.navigation.getParam('sku')})}
             bottomDivider topDivider subtitle={item.organisation+" - "+item.region} title={item.number} titleStyle={item.ally&&item.opp?{ color: 'purple', fontWeight: 'bold' }:item.ally?{ color: 'green', fontWeight: 'bold' }:item.opp?{ color: 'red', fontWeight: 'bold' }:null}/>}
             keyExtractor={item => item.id}
-      ListEmptyComponent={<View><Text>No Competitions found for {this.state.team}</Text></View>}
+            ListEmptyComponent={<View><Text>No Competitions found for {this.state.team}</Text></View>}
         />
       )
     }
